@@ -12,6 +12,7 @@ import hashlib
 import base64
 import threading
 import argparse
+from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse, parse_qs, urlencode, quote
 from dataclasses import dataclass
@@ -555,12 +556,15 @@ def main() -> None:
                 except Exception:
                     fname_email = "unknown"
 
-                file_name = f"token_{fname_email}_{int(time.time())}.json"
+                out_dir = Path(__file__).parent.resolve()
+                out_dir.mkdir(parents=True, exist_ok=True)
+                file_path = out_dir / f"token_{fname_email}_{int(time.time())}.json"
 
-                with open(file_name, "w", encoding="utf-8") as f:
-                    f.write(token_json)
-
-                print(f"[*] 成功! Token 已保存至: {file_name}")
+                try:
+                    file_path.write_text(token_json, encoding="utf-8")
+                    print(f"[*] 成功! Token 已保存至: {file_path}")
+                except Exception as e:
+                    print(f"[Error] 保存 token 失败: {e}")
             else:
                 print("[-] 本次注册失败。")
 
